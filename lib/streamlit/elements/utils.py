@@ -5,6 +5,8 @@ from streamlit.report_thread import get_report_ctx
 from streamlit.errors import DuplicateWidgetID
 from typing import Optional, Any
 
+from streamlit.widgets import WidgetCallback
+
 
 class NoValue(object):
     """Return this from DeltaGenerator.foo_widget() when you want the st.foo_widget()
@@ -100,6 +102,7 @@ def _get_widget_ui_value(
     element_proto: Any,
     user_key: Optional[str] = None,
     widget_func_name: Optional[str] = None,
+    on_changed: Optional[WidgetCallback] = None,
 ) -> Any:
     """Get the widget ui_value from the report context.
     NOTE: This function should be called after the proto has been filled.
@@ -129,7 +132,12 @@ def _get_widget_ui_value(
     """
     _set_widget_id(element_type, element_proto, user_key, widget_func_name)
     ctx = get_report_ctx()
-    ui_value = ctx.widgets.get_widget_value(element_proto.id) if ctx else None
+    if ctx is None:
+        return None
+
+    ui_value = ctx.widgets.get_widget_value(element_proto.id)
+    if on_changed is not None:
+        ctx.widgets.add_callback(element_proto.id, on_changed)
     return ui_value
 
 

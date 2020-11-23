@@ -28,7 +28,6 @@ from streamlit.report_thread import get_report_ctx
 from streamlit.script_request_queue import ScriptRequest
 from streamlit.logger import get_logger
 from streamlit.proto.ClientState_pb2 import ClientState
-from streamlit.widgets import Widgets
 
 LOGGER = get_logger(__name__)
 
@@ -57,6 +56,7 @@ class ScriptRunner(object):
         enqueue_forward_msg,
         client_state,
         request_queue,
+        widgets,
         uploaded_file_mgr=None,
     ):
         """Initialize the ScriptRunner.
@@ -90,8 +90,7 @@ class ScriptRunner(object):
         self._uploaded_file_mgr = uploaded_file_mgr
 
         self._client_state = client_state
-        self._widgets = Widgets()
-        self._widgets.set_state(client_state.widget_states)
+        self._widgets = widgets
 
         self.on_event = Signal(
             doc="""Emitted when a ScriptRunnerEvent occurs.
@@ -246,7 +245,7 @@ class ScriptRunner(object):
 
         LOGGER.debug("Running script %s", rerun_data)
 
-        # Reset DeltaGenerators, widgets, media files.
+        # Reset media files.
         media_file_manager.clear_session_files()
 
         ctx = get_report_ctx()
@@ -293,12 +292,28 @@ class ScriptRunner(object):
             )
             return
 
+        # Run callbacks for widgets whose values have changed.
+        if rerun_data.widget_states is not None:
+            try:
+                self._widgets.call_callbacks(rerun_data.widget_states)
+            except BaseException as e:
+                LOGGER.debug("Callback: %s" % e)
+                self.on_event.send(
+                    ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR, exception=e
+                )
+                return
+            finally:
+                # We clear callbacks immediately after they're called,
+                # regardless of whether an error was thrown. Callbacks are
+                # rebuilt on every rerun, so we're always running callbacks
+                # from the most recent report run.
+                self._widgets.clear_callbacks()
+
         # If we get here, we've successfully compiled our script. The next step
         # is to run it. Errors thrown during execution will be shown to the
         # user as ExceptionElements.
 
         # Update the Widget object with the new widget_states.
-        # (The ReportContext has a reference to this object, so we just update it in-place)
         if rerun_data.widget_states is not None:
             self._widgets.set_state(rerun_data.widget_states)
 

@@ -17,12 +17,10 @@ from typing import List
 import os
 import sys
 import time
-import unittest
 
 from parameterized import parameterized
 from tornado.testing import AsyncTestCase
 
-from streamlit.media_file_manager import media_file_manager
 from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.WidgetStates_pb2 import WidgetStates
 from streamlit.report import Report
@@ -32,6 +30,7 @@ from streamlit.script_request_queue import ScriptRequest
 from streamlit.script_request_queue import ScriptRequestQueue
 from streamlit.script_runner import ScriptRunner
 from streamlit.script_runner import ScriptRunnerEvent
+from streamlit.widgets import Widgets
 
 text_utf = "complete! 👨‍🎤"
 text_no_encoding = text_utf
@@ -300,7 +299,7 @@ class ScriptRunnerTest(AsyncTestCase):
 
             states = WidgetStates()
             _create_widget(radio_widget_id, states).int_value = ii
-            runner.enqueue_rerun(widget_state=states)
+            runner.enqueue_rerun(widget_states=states)
 
         # Start the runners and wait a beat.
         for runner in runners:
@@ -431,6 +430,7 @@ class TestScriptRunner(ScriptRunner):
             enqueue_forward_msg=enqueue_fn,
             client_state=ClientState(),
             request_queue=self.script_request_queue,
+            widgets=Widgets(),
         )
 
         # Accumulates uncaught exceptions thrown by our run thread.
@@ -520,8 +520,10 @@ def require_widgets_deltas(
 
     # If we get here, at least 1 runner hasn't yet completed before our
     # timeout. Create an error string for debugging.
-    err_string = "require_widgets_deltas() timed out after {}s ({}/{} runners complete)".format(
-        timeout, num_complete, len(runners)
+    err_string = (
+        "require_widgets_deltas() timed out after {}s ({}/{} runners complete)".format(
+            timeout, num_complete, len(runners)
+        )
     )
     for runner in runners:
         if len(runner.deltas()) < NUM_DELTAS:

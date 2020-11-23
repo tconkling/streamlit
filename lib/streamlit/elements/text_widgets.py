@@ -5,7 +5,9 @@ from .utils import _get_widget_ui_value
 
 
 class TextWidgetsMixin:
-    def text_input(dg, label, value="", max_chars=None, key=None, type="default"):
+    def text_input(
+        dg, label, value="", max_chars=None, key=None, type="default", on_changed=None
+    ):
         """Display a single-line text input widget.
 
         Parameters
@@ -26,6 +28,8 @@ class TextWidgetsMixin:
             The type of the text input. This can be either "default" (for
             a regular text input), or "password" (for a text input that
             masks the user's typed value). Defaults to "default".
+        on_changed : callable
+            TODO
 
         Returns
         -------
@@ -55,8 +59,11 @@ class TextWidgetsMixin:
                 % type
             )
 
-        ui_value = _get_widget_ui_value("text_input", text_input_proto, user_key=key)
+        ui_value = _get_widget_ui_value(
+            "text_input", text_input_proto, user_key=key, on_changed=on_changed
+        )
         current_value = ui_value if ui_value is not None else value
+
         return dg._enqueue("text_input", text_input_proto, str(current_value))  # type: ignore
 
     def text_area(dg, label, value="", height=None, max_chars=None, key=None):

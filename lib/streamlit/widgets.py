@@ -77,11 +77,6 @@ class Widgets(object):
                 continue
 
             old_value = self.get_widget_value(new_state.id)
-            if old_value is None:
-                # The widget did not previously have a value, which means
-                # it was just defined.
-                continue
-
             new_value = _get_widget_value(new_state)
             if new_value == old_value:
                 # The widget's value has not changed.

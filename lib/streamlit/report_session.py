@@ -41,6 +41,7 @@ from streamlit.storage.file_storage import FileStorage
 from streamlit.storage.s3_storage import S3Storage
 from streamlit.watcher.local_sources_watcher import LocalSourcesWatcher
 import streamlit.elements.exception_proto as exception_proto
+from streamlit.widgets import Widgets
 
 LOGGER = get_logger(__name__)
 
@@ -86,6 +87,7 @@ class ReportSession(object):
         self._ioloop = ioloop
         self._report = Report(script_path, command_line)
         self._uploaded_file_mgr = uploaded_file_manager
+        self._widgets = Widgets()
 
         self._state = ReportSessionState.REPORT_NOT_RUNNING
 
@@ -538,6 +540,7 @@ class ReportSession(object):
             enqueue_forward_msg=self.enqueue,
             client_state=self._client_state,
             request_queue=self._script_request_queue,
+            widgets=self._widgets,
             uploaded_file_mgr=self._uploaded_file_mgr,
         )
         self._scriptrunner.on_event.connect(self._on_scriptrunner_event)
