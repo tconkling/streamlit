@@ -3,7 +3,7 @@ from .utils import _get_widget_ui_value
 
 
 class ButtonMixin:
-    def button(dg, label, key=None):
+    def button(dg, label, key=None, on_clicked=None):
         """Display a button widget.
 
         Parameters
@@ -15,6 +15,8 @@ class ButtonMixin:
             If this is omitted, a key will be generated for the widget
             based on its content. Multiple widgets of the same type may
             not share the same key.
+        on_clicked : callable
+            TODO
 
         Returns
         -------
@@ -34,7 +36,9 @@ class ButtonMixin:
         button_proto.label = label
         button_proto.default = False
 
-        ui_value = _get_widget_ui_value("button", button_proto, user_key=key)
+        ui_value = _get_widget_ui_value(
+            "button", button_proto, user_key=key, on_changed=on_clicked
+        )
         current_value = ui_value if ui_value is not None else False
 
         return dg._enqueue("button", button_proto, current_value)  # type: ignore

@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import inspect
 from pprint import pprint
 from typing import Any, Optional, Dict, Callable
 
@@ -19,7 +20,31 @@ from streamlit.proto.ClientState_pb2 import ClientState
 from streamlit.proto.WidgetStates_pb2 import WidgetStates, WidgetState
 import json
 
-WidgetCallback = Callable[[Any, Any], None]
+# A widget callback, by default, takes (new_value, old_value) params.
+# Any of those params can be optionally omitted.
+WidgetCallback = Callable[..., None]
+
+
+def _make_nary(f, pad_arg=None):
+    """Return a function wrapper that allows the given function to be
+    called with extra arguments. Excess args will be trimmed.
+    """
+    sig = inspect.signature(f)
+    arity = len(sig.parameters)
+
+    def wrapper(*received_args):
+        args = list(received_args)
+        num_args = len(args)
+        if num_args > arity:
+            # We received more args than we need - trim.
+            args = args[:arity]
+        elif num_args < arity:
+            # We received fewer args than we need - pad.
+            args.extend([pad_arg] * (arity - num_args))
+
+        return f(*args)
+
+    return wrapper
 
 
 def coalesce_widget_states(
@@ -66,7 +91,7 @@ class Widgets(object):
         """Add a callback that will be called immediately before the app's
         next rerun if the given widget's value has changed.
         """
-        self._callbacks[widget_id] = callback
+        self._callbacks[widget_id] = _make_nary(callback)
 
     def call_callbacks(self, new_widget_states: WidgetStates) -> None:
         """TODO"""
