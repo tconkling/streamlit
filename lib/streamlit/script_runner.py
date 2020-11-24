@@ -286,9 +286,10 @@ class ScriptRunner(object):
 
         except BaseException as e:
             # We got a compile error. Send an error event and bail immediately.
-            LOGGER.debug("Fatal script error: %s" % e)
+            LOGGER.debug(f"Fatal script error: {e}")
             self.on_event.send(
-                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR, exception=e
+                ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+                exception=e,
             )
             return
 
@@ -297,9 +298,11 @@ class ScriptRunner(object):
             try:
                 self._widgets.call_callbacks(rerun_data.widget_states)
             except BaseException as e:
-                LOGGER.debug("Callback: %s" % e)
+                # TODO: change this error name, or create a new one
+                LOGGER.debug(f"Callback error: {e}")
                 self.on_event.send(
-                    ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR, exception=e
+                    ScriptRunnerEvent.SCRIPT_STOPPED_WITH_COMPILE_ERROR,
+                    exception=e,
                 )
                 return
             finally:
