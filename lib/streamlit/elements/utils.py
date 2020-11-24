@@ -1,6 +1,7 @@
 import textwrap
 
 from streamlit import type_util
+from streamlit.proto.WidgetStates_pb2 import WidgetState
 from streamlit.report_thread import get_report_ctx
 from streamlit.errors import DuplicateWidgetID
 from typing import Optional, Any
@@ -103,7 +104,8 @@ def _get_widget_ui_value(
     user_key: Optional[str] = None,
     widget_func_name: Optional[str] = None,
     on_changed: Optional[WidgetCallback] = None,
-) -> Any:
+    default: Optional[WidgetState] = None,
+) -> Optional[Any]:
     """Get the widget ui_value from the report context.
     NOTE: This function should be called after the proto has been filled.
 
@@ -121,10 +123,14 @@ def _get_widget_ui_value(
         its element_type. Custom components are a special case: they all have
         the element_type "component_instance", but are instantiated with
         dynamically-named functions.
+    on_changed : callable
+        TODO
+    default : WidgetState
+        TODO
 
     Returns
     -------
-    ui_value : any
+    ui_value : Any or None
         The value of the widget set by the client or
         the default value passed. If the report context
         doesn't exist, None will be returned.
@@ -135,10 +141,17 @@ def _get_widget_ui_value(
     if ctx is None:
         return None
 
-    ui_value = ctx.widgets.get_widget_value(element_proto.id)
+    widget_value = ctx.widgets.get_widget_value(element_proto.id)
+    if widget_value is None and default is not None:
+        # The widget is newly-created. Register its default value with the
+        # Widgets manager.
+        ctx.widgets.set_widget_value(element_proto.id, default)
+        widget_value = default
+
     if on_changed is not None:
         ctx.widgets.add_callback(element_proto.id, on_changed)
-    return ui_value
+
+    return widget_value
 
 
 def last_index_for_melted_dataframes(data):

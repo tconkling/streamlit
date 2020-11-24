@@ -118,6 +118,10 @@ class Widgets(object):
         """Return the value of a widget, or None if no value has been set."""
         return _get_widget_value(self._widget_states.get(widget_id, None))
 
+    def set_widget_value(self, widget_id: str, value: WidgetState) -> None:
+        """Set the given widget's value."""
+        self._widget_states[widget_id] = value
+
     def set_state(self, widget_states: WidgetStates) -> None:
         """Copy the state from a WidgetStates protobuf into our state dict."""
         self._widget_states = {}
