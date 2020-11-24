@@ -1,6 +1,7 @@
 from datetime import date, time, datetime, timedelta, timezone
 
 from streamlit.proto.Slider_pb2 import Slider as SliderProto
+from streamlit.proto.WidgetStates_pb2 import WidgetState
 from streamlit.errors import StreamlitAPIException
 from streamlit.js_number import JSNumber
 from streamlit.js_number import JSNumberBoundsException
@@ -355,8 +356,11 @@ class SliderMixin:
         slider_proto.data_type = data_type
         slider_proto.options[:] = []
 
+        default = WidgetState()
+        default.float_array_value.value[:] = value
+
         ui_value = _get_widget_ui_value(
-            "slider", slider_proto, user_key=key, on_changed=on_changed
+            "slider", slider_proto, user_key=key, on_changed=on_changed, default=default
         )
         if ui_value:
             current_value = getattr(ui_value, "value")

@@ -18,7 +18,7 @@ def f_to_c(f):
 
 
 def get_state():
-    return SessionState.get(celsius=0)
+    return SessionState.get(celsius=10)
 
 
 def get_celsius():

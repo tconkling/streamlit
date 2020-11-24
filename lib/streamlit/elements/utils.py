@@ -145,8 +145,9 @@ def _get_widget_ui_value(
     if widget_value is None and default is not None:
         # The widget is newly-created. Register its default value with the
         # Widgets manager.
+        default.id = element_proto.id
         ctx.widgets.set_widget_value(element_proto.id, default)
-        widget_value = default
+        widget_value = ctx.widgets.get_widget_value(element_proto.id)
 
     if on_changed is not None:
         ctx.widgets.add_callback(element_proto.id, on_changed)
