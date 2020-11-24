@@ -17,6 +17,7 @@ class SliderMixin:
         step=None,
         format=None,
         key=None,
+        on_changed=None,
     ):
         """Display a slider widget.
 
@@ -64,6 +65,8 @@ class SliderMixin:
             If this is omitted, a key will be generated for the widget
             based on its content. Multiple widgets of the same type may
             not share the same key.
+        on_changed : callable
+            TODO
 
         Returns
         -------
@@ -352,7 +355,9 @@ class SliderMixin:
         slider_proto.data_type = data_type
         slider_proto.options[:] = []
 
-        ui_value = _get_widget_ui_value("slider", slider_proto, user_key=key)
+        ui_value = _get_widget_ui_value(
+            "slider", slider_proto, user_key=key, on_changed=on_changed
+        )
         if ui_value:
             current_value = getattr(ui_value, "value")
         else:
