@@ -1,5 +1,5 @@
 import streamlit as st
-import SessionState
+import streamlit.SessionState as SessionState
 
 
 def c_to_f(c):
@@ -62,3 +62,5 @@ st.selectbox(
 )
 
 st.button("Button", on_changed=lambda: print(f"Button clicked!"))
+
+st.text_input("Text input", on_changed=lambda value: print(f"Text input: {value}"))
