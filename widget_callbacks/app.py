@@ -1,12 +1,5 @@
 import streamlit as st
 import SessionState
-from streamlit.proto.WidgetStates_pb2 import FloatArray
-
-
-def get_slider_value(value) -> int:
-    if isinstance(value, FloatArray):
-        return int(value.value[0])
-    return int(value)
 
 
 def c_to_f(c):
@@ -30,13 +23,11 @@ def get_fahrenheit():
 
 
 def set_celsius(new_value):
-    get_state().celsius = get_slider_value(new_value)
-    print(f"set_celsius: {get_celsius()}")
+    get_state().celsius = int(new_value)
 
 
 def set_fahrenheit(new_value):
-    get_state().celsius = f_to_c(get_slider_value(new_value))
-    print(f"set_fahrenheit: {get_fahrenheit()}")
+    get_state().celsius = f_to_c(new_value)
 
 
 MIN_C = -100

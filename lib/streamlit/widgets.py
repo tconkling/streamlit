@@ -17,7 +17,13 @@ from pprint import pprint
 from typing import Any, Optional, Dict, Callable
 
 from streamlit.proto.ClientState_pb2 import ClientState
-from streamlit.proto.WidgetStates_pb2 import WidgetStates, WidgetState
+from streamlit.proto.DataFrame_pb2 import StringArray
+from streamlit.proto.WidgetStates_pb2 import (
+    WidgetStates,
+    WidgetState,
+    FloatArray,
+    IntArray,
+)
 import json
 
 # A widget callback, by default, takes (new_value, old_value) params.
@@ -108,7 +114,7 @@ class Widgets(object):
                 continue
 
             # The widget's value has changed - call its onChanged callback.
-            callback(new_value, old_value)
+            callback(_unwrap_value(new_value), _unwrap_value(old_value))
 
     def clear_callbacks(self) -> None:
         """Clear all registered on_changed callbacks."""
@@ -162,3 +168,18 @@ def _get_widget_value(state: Optional[WidgetState]) -> Optional[Any]:
         return json.loads(getattr(state, value_type))
 
     return getattr(state, value_type)
+
+
+def _unwrap_value(value: Any) -> Any:
+    """Hack to "unwrap" a widget's protobuf value (so, e.g., a FloatArray
+    becomes a list of doubles). We don't want to ship this! Instead, widgets
+    should specify value transformers or something.
+    """
+    if isinstance(value, (FloatArray, IntArray, StringArray)):
+        value_list = value.value
+        if len(value_list) == 1:
+            return value_list[0]
+        else:
+            return value_list
+
+    return value
