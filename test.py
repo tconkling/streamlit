@@ -58,7 +58,7 @@ st.header("Other widgets")
 st.selectbox(
     "Selectbox",
     ["one", "two", "three"],
-    on_changed=lambda value: print(f"selectbox: {value}"),
+    on_changed=print,
 )
 
 st.button("Button", on_changed=lambda: print(f"Button clicked!"))

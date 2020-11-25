@@ -35,7 +35,12 @@ def _make_nary(f, pad_arg=None):
     """Return a function wrapper that allows the given function to be
     called with extra arguments. Excess args will be trimmed.
     """
-    sig = inspect.signature(f)
+    try:
+        sig = inspect.signature(f)
+    except ValueError:
+        # Built-ins like `print` don't have signatures
+        return f
+
     arity = len(sig.parameters)
 
     def wrapper(*received_args):
