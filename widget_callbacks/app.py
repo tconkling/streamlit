@@ -61,4 +61,4 @@ st.selectbox(
     on_changed=lambda value: print(f"selectbox: {value}"),
 )
 
-st.button("Button", on_clicked=lambda: print(f"Button clicked!"))
+st.button("Button", on_changed=lambda: print(f"Button clicked!"))
