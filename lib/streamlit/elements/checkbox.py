@@ -1,9 +1,10 @@
 from streamlit.proto.Checkbox_pb2 import Checkbox as CheckboxProto
 from .utils import _get_widget_ui_value
+from ..proto.WidgetStates_pb2 import WidgetState
 
 
 class CheckboxMixin:
-    def checkbox(dg, label, value=False, key=None):
+    def checkbox(dg, label, value=False, key=None, on_changed=None):
         """Display a checkbox widget.
 
         Parameters
@@ -36,6 +37,15 @@ class CheckboxMixin:
         checkbox_proto.label = label
         checkbox_proto.default = bool(value)
 
-        ui_value = _get_widget_ui_value("checkbox", checkbox_proto, user_key=key)
+        default = WidgetState()
+        default.bool_value = bool(value)
+
+        ui_value = _get_widget_ui_value(
+            "checkbox",
+            checkbox_proto,
+            user_key=key,
+            default=default,
+            on_changed=on_changed,
+        )
         current_value = ui_value if ui_value is not None else value
         return dg._enqueue("checkbox", checkbox_proto, bool(current_value))  # type: ignore

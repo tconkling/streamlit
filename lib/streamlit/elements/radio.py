@@ -2,10 +2,11 @@ from streamlit.proto.Radio_pb2 import Radio as RadioProto
 from streamlit.errors import StreamlitAPIException
 from streamlit.type_util import ensure_iterable
 from .utils import _get_widget_ui_value, NoValue
+from ..proto.WidgetStates_pb2 import WidgetState
 
 
 class RadioMixin:
-    def radio(dg, label, options, index=0, format_func=str, key=None):
+    def radio(dg, label, options, index=0, format_func=str, key=None, on_changed=None):
         """Display a radio button widget.
 
         Parameters
@@ -62,7 +63,12 @@ class RadioMixin:
         radio_proto.default = index
         radio_proto.options[:] = [str(format_func(option)) for option in options]
 
-        ui_value = _get_widget_ui_value("radio", radio_proto, user_key=key)
+        default = WidgetState()
+        default.int_value = index
+
+        ui_value = _get_widget_ui_value(
+            "radio", radio_proto, user_key=key, default=default, on_changed=on_changed
+        )
         current_value = ui_value if ui_value is not None else index
 
         return_value = (

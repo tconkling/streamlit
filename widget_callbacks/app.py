@@ -35,6 +35,7 @@ MAX_C = 300
 MIN_F = c_to_f(MIN_C)
 MAX_F = c_to_f(MAX_C)
 
+st.header("Temperature")
 
 st.slider(
     "Celsius",
@@ -51,3 +52,13 @@ st.slider(
     on_changed=set_fahrenheit,
 )
 st.write(f"Temperature: {get_celsius()}C ({get_fahrenheit()}F)")
+
+st.header("Other widgets")
+
+st.selectbox(
+    "Selectbox",
+    ["one", "two", "three"],
+    on_changed=lambda value: print(f"selectbox: {value}"),
+)
+
+st.button("Button", on_clicked=lambda: print(f"Button clicked!"))

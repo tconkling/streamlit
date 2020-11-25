@@ -16,6 +16,7 @@ class NumberInputMixin:
         step=None,
         format=None,
         key=None,
+        on_changed=None,
     ):
         """Display a numeric input widget.
 
@@ -195,7 +196,7 @@ class NumberInputMixin:
             number_input_proto.format = format
 
         ui_value = _get_widget_ui_value(
-            "number_input", number_input_proto, user_key=key
+            "number_input", number_input_proto, user_key=key, on_changed=on_changed
         )
 
         return_value = ui_value if ui_value is not None else value

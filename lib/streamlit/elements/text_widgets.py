@@ -2,6 +2,7 @@ from streamlit.proto.TextInput_pb2 import TextInput as TextInputProto
 from streamlit.proto.TextArea_pb2 import TextArea as TextAreaProto
 from streamlit.errors import StreamlitAPIException
 from .utils import _get_widget_ui_value
+from ..proto.WidgetStates_pb2 import WidgetState
 
 
 class TextWidgetsMixin:
@@ -59,14 +60,23 @@ class TextWidgetsMixin:
                 % type
             )
 
+        default = WidgetState()
+        default.string_value = str(value)
+
         ui_value = _get_widget_ui_value(
-            "text_input", text_input_proto, user_key=key, on_changed=on_changed
+            "text_input",
+            text_input_proto,
+            user_key=key,
+            default=default,
+            on_changed=on_changed,
         )
         current_value = ui_value if ui_value is not None else value
 
         return dg._enqueue("text_input", text_input_proto, str(current_value))  # type: ignore
 
-    def text_area(dg, label, value="", height=None, max_chars=None, key=None):
+    def text_area(
+        dg, label, value="", height=None, max_chars=None, key=None, on_changed=None
+    ):
         """Display a multi-line text input widget.
 
         Parameters
@@ -114,6 +124,15 @@ class TextWidgetsMixin:
         if max_chars is not None:
             text_area_proto.max_chars = max_chars
 
-        ui_value = _get_widget_ui_value("text_area", text_area_proto, user_key=key)
+        default = WidgetState()
+        default.string_value = str(value)
+
+        ui_value = _get_widget_ui_value(
+            "text_area",
+            text_area_proto,
+            user_key=key,
+            default=default,
+            on_changed=on_changed,
+        )
         current_value = ui_value if ui_value is not None else value
         return dg._enqueue("text_area", text_area_proto, str(current_value))  # type: ignore

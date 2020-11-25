@@ -4,10 +4,11 @@ from streamlit.proto.TimeInput_pb2 import TimeInput as TimeInputProto
 from streamlit.proto.DateInput_pb2 import DateInput as DateInputProto
 from streamlit.errors import StreamlitAPIException
 from .utils import _get_widget_ui_value
+from ..proto.WidgetStates_pb2 import WidgetState
 
 
 class TimeWidgetsMixin:
-    def time_input(dg, label, value=None, key=None):
+    def time_input(dg, label, value=None, key=None, on_changed=None):
         """Display a time input widget.
 
         Parameters
@@ -52,7 +53,16 @@ class TimeWidgetsMixin:
         time_input_proto.label = label
         time_input_proto.default = time.strftime(value, "%H:%M")
 
-        ui_value = _get_widget_ui_value("time_input", time_input_proto, user_key=key)
+        default = WidgetState()
+        default.string_value = time.strftime(value, "%H:%M")
+
+        ui_value = _get_widget_ui_value(
+            "time_input",
+            time_input_proto,
+            user_key=key,
+            default=default,
+            on_changed=on_changed,
+        )
         current_value = (
             datetime.strptime(ui_value, "%H:%M").time()
             if ui_value is not None
@@ -61,7 +71,7 @@ class TimeWidgetsMixin:
         return dg._enqueue("time_input", time_input_proto, current_value)  # type: ignore
 
     def date_input(
-        dg, label, value=None, min_value=None, max_value=None, key=None,
+        dg, label, value=None, min_value=None, max_value=None, key=None, on_changed=None
     ):
         """Display a date input widget.
 
@@ -136,7 +146,11 @@ class TimeWidgetsMixin:
 
         date_input_proto.max = date.strftime(max_value, "%Y/%m/%d")
 
-        ui_value = _get_widget_ui_value("date_input", date_input_proto, user_key=key)
+        # TODO: default
+
+        ui_value = _get_widget_ui_value(
+            "date_input", date_input_proto, user_key=key, on_changed=on_changed
+        )
 
         if ui_value is not None:
             value = getattr(ui_value, "data")

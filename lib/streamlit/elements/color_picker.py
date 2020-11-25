@@ -3,10 +3,11 @@ import re
 from streamlit.proto.ColorPicker_pb2 import ColorPicker as ColorPickerProto
 from streamlit.errors import StreamlitAPIException
 from .utils import _get_widget_ui_value
+from ..proto.WidgetStates_pb2 import WidgetState
 
 
 class ColorPickerMixin:
-    def color_picker(dg, label, value=None, key=None):
+    def color_picker(dg, label, value=None, key=None, on_changed=None):
         """Display a color picker widget.
 
         Note: This is a beta feature. See
@@ -67,8 +68,15 @@ class ColorPickerMixin:
         color_picker_proto.label = label
         color_picker_proto.default = str(value)
 
+        default = WidgetState()
+        default.string_value = str(value)
+
         ui_value = _get_widget_ui_value(
-            "color_picker", color_picker_proto, user_key=key
+            "color_picker",
+            color_picker_proto,
+            user_key=key,
+            default=default,
+            on_changed=on_changed,
         )
         current_value = ui_value if ui_value is not None else value
         return dg._enqueue("color_picker", color_picker_proto, str(current_value))  # type: ignore
